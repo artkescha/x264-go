@@ -23,7 +23,7 @@ func main() {
 		LogLevel:  x264.LogDebug,
 	}
 
-	w := bufio.NewWriter(os.Stdout)
+	w := bufio.NewWriter(os.Stdin)
 	defer w.Flush()
 
 	//w, err := os.Create("example.264")
@@ -53,7 +53,7 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	for i := 0; i <= 100; i++ {
+	for i := 0; i <= 1; i++ {
 		err = enc.Encode(img)
 		if err != nil {
 			fmt.Println(err)
