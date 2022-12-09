@@ -59,7 +59,6 @@ func main() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		//ffmpeg -re -i video.mp4 -c:a copy -c:v copy -f flv rtsp://127.0.0.1:1935/live/test
 	}
 
 	err = enc.Flush()
@@ -69,5 +68,5 @@ func main() {
 	}
 	cmd := exec.Command("ffmpeg -i pipe:0 -c:a copy -c:v copy -f flv rtsp://127.0.0.1:1935/live/test")
 	err = cmd.Run()
-	fmt.Fprintf(os.Stderr, "std err: %s", err)
+	fmt.Fprintf(os.Stderr, "stderr: %s", err)
 }
