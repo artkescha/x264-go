@@ -1,7 +1,7 @@
 /*****************************************************************************
  * threadpool.c: thread pooling
  *****************************************************************************
- * Copyright (C) 2010-2022 x264 project
+ * Copyright (C) 2010-2021 x264 project
  *
  * Authors: Steven Walters <kemuri9@gmail.com>
  *
@@ -37,6 +37,8 @@ struct x264_threadpool_t
     volatile int   exit;
     int            threads;
     x264_pthread_t *thread_handle;
+    void           (*init_func)(void *);
+    void           *init_arg;
 
     /* requires a synchronized list structure and associated methods,
        so use what is already implemented for frames */
@@ -47,6 +49,9 @@ struct x264_threadpool_t
 
 REALIGN_STACK static void *threadpool_thread( x264_threadpool_t *pool )
 {
+    if( pool->init_func )
+        pool->init_func( pool->init_arg );
+
     while( !pool->exit )
     {
         x264_threadpool_job_t *job = NULL;
@@ -67,7 +72,8 @@ REALIGN_STACK static void *threadpool_thread( x264_threadpool_t *pool )
     return NULL;
 }
 
-int x264_threadpool_init( x264_threadpool_t **p_pool, int threads )
+int x264_threadpool_init( x264_threadpool_t **p_pool, int threads,
+                          void (*init_func)(void *), void *init_arg )
 {
     if( threads <= 0 )
         return -1;
@@ -79,6 +85,8 @@ int x264_threadpool_init( x264_threadpool_t **p_pool, int threads )
     CHECKED_MALLOCZERO( pool, sizeof(x264_threadpool_t) );
     *p_pool = pool;
 
+    pool->init_func = init_func;
+    pool->init_arg  = init_arg;
     pool->threads   = threads;
 
     CHECKED_MALLOC( pool->thread_handle, pool->threads * sizeof(x264_pthread_t) );

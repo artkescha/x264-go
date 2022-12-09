@@ -1,7 +1,7 @@
 /*****************************************************************************
  * set.c: quantization init
  *****************************************************************************
- * Copyright (C) 2005-2022 x264 project
+ * Copyright (C) 2005-2021 x264 project
  *
  * Authors: Loren Merritt <lorenm@u.washington.edu>
  *
@@ -158,9 +158,6 @@ int x264_cqm_init( x264_t *h )
                      quant8_mf[i_list][q][i] = DIV(def_quant8[q][i] * 16, h->sps->scaling_list[4+i_list][i]);
             }
     }
-
-#define MAX_MF X264_MIN( 0xffff, (1 << (25 - BIT_DEPTH)) - 1 )
-
     for( int q = 0; q <= QP_MAX_SPEC; q++ )
     {
         int j;
@@ -168,8 +165,7 @@ int x264_cqm_init( x264_t *h )
             for( int i = 0; i < 16; i++ )
             {
                 h->unquant4_mf[i_list][q][i] = (1ULL << (q/6 + 15 + 8)) / quant4_mf[i_list][q%6][i];
-                j = SHIFT(quant4_mf[i_list][q%6][i], q/6 - 1);
-                h->quant4_mf[i_list][q][i] = (uint16_t)j;
+                h->quant4_mf[i_list][q][i] = j = SHIFT(quant4_mf[i_list][q%6][i], q/6 - 1);
                 if( !j )
                 {
                     min_qp_err = X264_MIN( min_qp_err, q );
@@ -178,9 +174,9 @@ int x264_cqm_init( x264_t *h )
                 // round to nearest, unless that would cause the deadzone to be negative
                 h->quant4_bias[i_list][q][i] = X264_MIN( DIV(deadzone[i_list]<<10, j), (1<<15)/j );
                 h->quant4_bias0[i_list][q][i] = (1<<15)/j;
-                if( j > MAX_MF && q > max_qp_err && (i_list == CQM_4IY || i_list == CQM_4PY) )
+                if( j > 0xffff && q > max_qp_err && (i_list == CQM_4IY || i_list == CQM_4PY) )
                     max_qp_err = q;
-                if( j > MAX_MF && q > max_chroma_qp_err && (i_list == CQM_4IC || i_list == CQM_4PC) )
+                if( j > 0xffff && q > max_chroma_qp_err && (i_list == CQM_4IC || i_list == CQM_4PC) )
                     max_chroma_qp_err = q;
             }
         if( h->param.analyse.b_transform_8x8 )
@@ -198,9 +194,9 @@ int x264_cqm_init( x264_t *h )
                     }
                     h->quant8_bias[i_list][q][i] = X264_MIN( DIV(deadzone[i_list]<<10, j), (1<<15)/j );
                     h->quant8_bias0[i_list][q][i] = (1<<15)/j;
-                    if( j > MAX_MF && q > max_qp_err && (i_list == CQM_8IY || i_list == CQM_8PY) )
+                    if( j > 0xffff && q > max_qp_err && (i_list == CQM_8IY || i_list == CQM_8PY) )
                         max_qp_err = q;
-                    if( j > MAX_MF && q > max_chroma_qp_err && (i_list == CQM_8IC || i_list == CQM_8PC) )
+                    if( j > 0xffff && q > max_chroma_qp_err && (i_list == CQM_8IC || i_list == CQM_8PC) )
                         max_chroma_qp_err = q;
                 }
     }

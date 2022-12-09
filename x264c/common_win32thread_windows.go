@@ -1,4 +1,3 @@
-//go:build windows && !extlib
 // +build windows,!extlib
 
 package x264c

@@ -1,3 +1,5 @@
+// +build !compat
+
 package x264c
 
 /*
@@ -7,10 +9,6 @@ package x264c
 import "C"
 
 import "unsafe"
-
-const (
-	rawParamSize = C.sizeof_x264_param_t
-)
 
 // Param type.
 type Param struct {
@@ -67,11 +65,10 @@ type Param struct {
 	IBframeAdaptive int32
 	IBframeBias     int32
 	// Keep some B-frames as references: 0=off, 1=strict hierarchical, 2=normal.
-	IBframePyramid  int32
-	BOpenGop        int32
-	BBlurayCompat   int32
-	IAvcintraClass  int32
-	IAvcintraFlavor int32
+	IBframePyramid int32
+	BOpenGop       int32
+	BBlurayCompat  int32
+	IAvcintraClass int32
 
 	BDeblockingFilter int32
 	// [-6, 6] -6 light filter, 6 strong.
@@ -123,11 +120,6 @@ type Param struct {
 	// Frame packing arrangement flag.
 	IFramePacking int32
 
-	MasteringDisplay  MasteringDisplay
-	ContentLightLevel ContentLightLevel
-
-	IAlternativeTransfer int32
-
 	// Muxing parameters.
 	// Generate access unit delimiters.
 	BAud int32
@@ -172,6 +164,7 @@ type Param struct {
 	BOpencl int32
 	// Specify count of GPU devices to skip, for CLI users.
 	IOpenclDevice int32
+	_             [4]byte
 	// Pass explicit cl_device_id as void*, for API users.
 	OpenclDeviceId unsafe.Pointer
 	// Filename (in UTF-8) of the compiled OpenCL kernel cache file.
@@ -189,9 +182,9 @@ type Param struct {
 	// Absolute cap on slices per frame; stops applying slice-max-size and slice-max-mbs if this is reached.
 	ISliceCountMax int32
 
+	_           [4]byte
 	ParamFree   *[0]byte
 	NaluProcess *[0]byte
-	Opaque      unsafe.Pointer
 }
 
 // cptr return C pointer.

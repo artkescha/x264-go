@@ -1,4 +1,3 @@
-//go:build !extlib
 // +build !extlib
 
 package x264c

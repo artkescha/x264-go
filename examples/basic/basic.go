@@ -1,13 +1,16 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"github.com/gen2brain/x264-go"
 	"image"
 	_ "image/jpeg"
 	"os"
-
-	"github.com/gen2brain/x264-go"
+	"os/exec"
 )
+
+//ffmpeg -re -i video.mp4 -c:a copy -c:v copy -f flv rtsp://127.0.0.1:1935/live/test
 
 func main() {
 	opts := &x264.Options{
@@ -20,13 +23,16 @@ func main() {
 		LogLevel:  x264.LogDebug,
 	}
 
-	w, err := os.Create("example.264")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	w := bufio.NewWriter(os.Stdout)
+	defer w.Flush()
 
-	defer w.Close()
+	//w, err := os.Create("example.264")
+	//if err != nil {
+	//	fmt.Println(err)
+	//	os.Exit(1)
+	//}
+
+	//defer w.Close()
 
 	enc, err := x264.NewEncoder(w, opts)
 	if err != nil {
@@ -47,11 +53,13 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
-	err = enc.Encode(img)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	for i := 0; i <= 100; i++ {
+		err = enc.Encode(img)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		//ffmpeg -re -i video.mp4 -c:a copy -c:v copy -f flv rtsp://127.0.0.1:1935/live/test
 	}
 
 	err = enc.Flush()
@@ -59,4 +67,7 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	cmd := exec.Command("ffmpeg -i pipe:0 -c:a copy -c:v copy -f flv rtsp://127.0.0.1:1935/live/test")
+	err = cmd.Run()
+	fmt.Fprintf(os.Stderr, "std err: %s", err)
 }

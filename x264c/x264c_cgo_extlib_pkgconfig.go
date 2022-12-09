@@ -1,4 +1,3 @@
-//go:build extlib && pkgconfig
 // +build extlib,pkgconfig
 
 package x264c
